@@ -1,0 +1,220 @@
+<html>
+<head>
+  <title>Websocket Client Tester</title>
+</head>
+
+<body>
+<main>
+  <section>
+    <header>
+      <h2>Chat Log <small> - Connected Users: <span id="connected-users-count">0</span> - <span id="current-channel"></span></small></h2>
+    </header>
+    <div id="chat-log">
+
+    </div>
+  </section>
+  <section>
+    <form id="chat-form">
+      <div>
+        <label>Send a Message!</label>
+        <input id="chat-input" type="text" />
+      </div>
+      <button id="message-submit"
+              type="submit">
+        Submit Message
+      </button>
+    </form>
+    <form id="channel-form">
+      <div>
+        <label>Create a Channel!</label>
+        <input id="channel-input" type="text" />
+      </div>
+      <button id="channel-submit" type="submit">
+        Submit Channel
+      </button>
+    </form>
+  </section>
+</main>
+</body>
+
+<script>
+  const url = "ws://localhost:8085"
+  const webSocket = new WebSocket(url)
+
+  webSocket.onopen = function onOpen(event) {
+    console.log("websocket successfully opened", event)
+  }
+
+  webSocket.onerror = function onError(event) {
+    console.log("websocket encountered an error: ", event)
+  }
+
+  webSocket.onmessage = function onMessage(event) {
+    const dataEvent = JSON.parse(event.data)
+    handleEvent(dataEvent)
+  }
+
+  webSocket.onclose = function onClose(event) {
+    console.log("websocket has closed!", event)
+  }
+
+  // ===== setup form bindings
+  //Setup elements
+  const formEl = document.getElementById("chat-form")
+  const chatInputEl = document.getElementById("chat-input")
+  const chatLogEl = document.getElementById("chat-log")
+  const channelFormEl = document.getElementById("channel-form")
+  const channelInputEl = document.getElementById("channel-input")
+  const connectedUsersCountEl = document.getElementById('connected-users-count')
+  const currentChannel = document.getElementById('current-channel')
+
+  formEl.addEventListener("submit", event => {
+    event.preventDefault()
+
+    const message = chatInputEl.value
+    chatInputEl.value = "" //Clear the input now that we are sending the message
+
+    webSocket.send(JSON.stringify({
+      type: 'SEND_MESSAGE',
+      data: {
+        content: message
+      }
+    }))
+  })
+
+  channelFormEl.addEventListener("submit", event => {
+    event.preventDefault()
+
+    const channelName = channelInputEl.value
+    channelInputEl.value = ""
+
+    webSocket.send(JSON.stringify({
+      type: 'CHANNEL_CREATE',
+      data: {
+        channel: {
+          name: channelName
+        }
+      }
+    }))
+  })
+
+  // ========= State Management ==========
+  const currentState = {
+    activeUsers: 1,
+    userId: Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7),
+    channels: []
+  }
+
+  function updateVisualState() {
+    connectedUsersCountEl.innerText = currentState.activeUsers
+    currentChannel.innerText = currentState.channels
+  }
+
+  function getMessageElement(messageId) {
+    return document.querySelector(`[data-message-id="${messageId}"]`)
+  }
+
+  function createMessageElement(message) {
+    chatLogEl.insertAdjacentHTML('beforeend', `
+        <div data-message-id="${message.id}">
+         <span data-message-content>${message.content}</span>
+         <span data-message-timestamp>${message.updatedAt}</span>
+        </div>
+      `)
+  }
+
+
+  // ======== WS Event Handling =======
+  function handleEvent(event) {
+    switch (event.type) {
+      case "IDENTIFY": {
+        webSocket.send(JSON.stringify({
+          type: "IDENTIFY_RESPONSE",
+          data: {
+            userId: currentState.userId
+          }
+        }))
+        break
+      }
+
+      case "READY": {
+        const { connectedUserTotal, currentMessages, channels } = event.data
+
+        currentMessages.forEach(message => {
+          createMessageElement(message)
+        })
+
+        currentState.activeUsers = connectedUserTotal
+        currentState.channels = channels
+        updateVisualState()
+
+        break
+      }
+
+      case "MESSAGE_CREATE": {
+        const { message } = event.data
+
+        createMessageElement(message)
+        break
+      }
+
+      case "MESSAGE_UPDATE": {
+        const { message } = event.data
+
+        const messageEl = getMessageElement(message.id)
+        if (messageEl) {
+          const contentEl = messageEl.querySelector('[data-message-content]')
+          contentEl.innerText = message.content
+
+          const timestampEl = messageEl.querySelector('[data-message-timestamp]')
+          timestampEl.innerText = message.updatedAt
+        }
+
+        break;
+      }
+
+      case "MESSAGE_DELETE": {
+        const { messageId } = event.data
+
+        const messageEl = getMessageElement(messageId)
+        if (messageEl) {
+          messageEl.remove()
+        }
+
+        break
+      }
+
+      case "CHANNEL_CREATE": {
+        const { channel } = event.data
+
+        currentState.channels.push(channel.name)
+        updateVisualState()
+        break
+      }
+
+      case "USER_CONNECTED": {
+        const { user } = event.data
+
+        currentState.activeUsers++
+        updateVisualState()
+        break
+      }
+
+      case "USER_DISCONNECTED": {
+        const { user } = event.data
+
+        currentState.activeUsers--
+        updateVisualState()
+        break
+      }
+    }
+  }
+
+</script>
+
+<style>
+  .main {
+
+  }
+</style>
+</html>
