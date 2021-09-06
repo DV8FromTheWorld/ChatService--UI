@@ -43,23 +43,22 @@
 
 <script lang="ts">
 // TODO : REMOVE THIS ESLINT-DISABLE. This is only here for the initial conversion to TS + Vue3. Austin will remove this before adding more features.
-/* eslint-disable */
 import { defineComponent } from 'vue'
 
 interface Message {
-  id: string,
-  content: string,
+  id: string
+  content: string
   updatedAt: string
 }
 
 interface Channel {
-  id: string,
-  name: string,
+  id: string
+  name: string
   updateAt: string
 }
 
 interface WebsocketData {
-  type: string,
+  type: string
   data?: any
 }
 
@@ -90,24 +89,24 @@ export default defineComponent({
   },
   methods: {
     setupWebsocket() {
-      const url = "ws://localhost:8085"
+      const url = 'ws://localhost:8085'
       this.webSocket = new WebSocket(url)
 
-      this.webSocket.addEventListener("open", (event: Event) => {
-        console.log("websocket successfully opened", event)
+      this.webSocket.addEventListener('open', (event: Event) => {
+        console.log('websocket successfully opened', event)
       })
 
-      this.webSocket.addEventListener("error", (event: Event) => {
-        console.log("websocket encountered an error: ", event)
+      this.webSocket.addEventListener('error', (event: Event) => {
+        console.log('websocket encountered an error: ', event)
       })
 
-      this.webSocket.addEventListener("message", (event: MessageEvent) => {
+      this.webSocket.addEventListener('message', (event: MessageEvent) => {
         const dataEvent = JSON.parse(event.data)
         this.handleEvent(dataEvent)
       })
 
-      this.webSocket.addEventListener("close", (event: CloseEvent) => {
-        console.log("websocket has closed!", event)
+      this.webSocket.addEventListener('close', (event: CloseEvent) => {
+        console.log('websocket has closed!', event)
       })
     },
     sendThroughWebsocket(websocketData: WebsocketData) {
@@ -115,7 +114,7 @@ export default defineComponent({
     },
     handleChatSubmit() {
       const messageContent = this.messageInput
-      this.messageInput = "" //Clear the input now that we are sending the message
+      this.messageInput = '' //Clear the input now that we are sending the message
 
       this.sendThroughWebsocket({
         type: 'REST_CREATE_MESSAGE',
@@ -126,7 +125,7 @@ export default defineComponent({
     },
     handleChannelSubmit() {
       const channelName = this.channelInput
-      this.channelInput = ""
+      this.channelInput = ''
 
       this.sendThroughWebsocket({
         type: 'REST_CREATE_CHANNEL',
@@ -137,9 +136,9 @@ export default defineComponent({
     },
     handleEvent(event: MessageEvent) {
       switch (event.type) {
-        case "IDENTIFY": {
+        case 'IDENTIFY': {
           this.sendThroughWebsocket({
-            type: "IDENTIFY_RESPONSE",
+            type: 'IDENTIFY_RESPONSE',
             data: {
               userId: this.userId
             }
@@ -147,8 +146,8 @@ export default defineComponent({
           break
         }
 
-        case "READY": {
-          const {connectedUserTotal, currentMessages, channels } = event.data
+        case 'READY': {
+          const { connectedUserTotal, currentMessages, channels } = event.data
 
           this.channels = Object.values(channels)
           this.messages = currentMessages
@@ -157,14 +156,14 @@ export default defineComponent({
           break
         }
 
-        case "MESSAGE_CREATE": {
+        case 'MESSAGE_CREATE': {
           const { message } = event.data
 
           this.messages.push(message)
           break
         }
 
-        case "MESSAGE_UPDATE": {
+        case 'MESSAGE_UPDATE': {
           const { message } = event.data
 
           const messageIdx = this.messages.findIndex(msg => msg.id === message.id)
@@ -173,10 +172,10 @@ export default defineComponent({
           }
 
           this.messages[messageIdx] = message
-          break;
+          break
         }
 
-        case "MESSAGE_DELETE": {
+        case 'MESSAGE_DELETE': {
           const { messageId } = event.data
 
           this.messages = this.messages.filter(msg => msg.id !== messageId)
@@ -184,7 +183,7 @@ export default defineComponent({
           break
         }
 
-        case "CHANNEL_CREATE": {
+        case 'CHANNEL_CREATE': {
           const { channel } = event.data
 
           this.channels.push(channel)
@@ -192,17 +191,13 @@ export default defineComponent({
           break
         }
 
-        case "USER_CONNECTED": {
-          const { user } = event.data
-
+        case 'USER_CONNECTED': {
           this.activeUsers++
 
           break
         }
 
-        case "USER_DISCONNECTED": {
-          const { user } = event.data
-
+        case 'USER_DISCONNECTED': {
           this.activeUsers--
 
           break

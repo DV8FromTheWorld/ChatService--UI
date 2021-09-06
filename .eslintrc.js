@@ -13,6 +13,23 @@ module.exports = {
   },
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'space-before-function-paren': ['warn', {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always",
+    }],
+    'spaced-comment': 'off',
+    'curly': ['warn', 'all'],
+
+    "no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "none",
+        "ignoreRestSiblings": true
+      }
+    ]
+
   }
 }
