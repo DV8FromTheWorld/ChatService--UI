@@ -29,7 +29,11 @@ module.exports = {
         "args": "none",
         "ignoreRestSiblings": true
       }
-    ]
+    ],
+    "brace-style": ["warn", "stroustrup"],
 
+
+    //Revisit this one. Not sure we want to do this
+    "ban-ts-comment": "off"
   }
 }
