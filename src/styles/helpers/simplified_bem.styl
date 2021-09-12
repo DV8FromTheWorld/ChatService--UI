@@ -1,0 +1,8 @@
+simplified_bem()
+  $class = unquote(selector())
+  $modifier = unquote(slice($class, 1)) + '--'
+
+  $selectors = s("%s, [class^='%s'], [class*=' %s']", $class, $modifier, $modifier)
+
+  /{$selectors}
+    {block}

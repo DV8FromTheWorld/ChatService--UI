@@ -1,66 +1,52 @@
 <template>
-  <main>
+  <main class="channel-page">
+    <ChannelSelector />
     <section>
-      <header>
-        <h2>Chat Log</h2>
-        <small>Connected Users: {{totalOnlineUsers}}</small>
-      </header>
+      <section>
+        <header>
+          <h2>Chat Log</h2>
+          <small>Connected Users: {{totalOnlineUsers}}</small>
+        </header>
+
+        <div id="chat-log">
+          <div
+            v-for="message of messages"
+            :key="message.id"
+            :data-message-id="message.id">
+            <span>{{message.content}}</span>
+            <span>{{message.createdAt}}</span>
+          </div>
+        </div>
+      </section>
 
       <section>
-        <h3>Pick a channel to talk in!</h3>
-        <div>
-          <button
-            v-for="channel of channels"
-            :key="channel.id"
-            @click="handleChannelSelection(channel.id)">
-            {{channel.name}}
-          </button>
-        </div>
-        <form @submit.prevent="handleChannelSubmit">
+        <form @submit.prevent="handleChatSubmit">
           <div>
-            <label>Create a Channel!</label>
-            <input v-model="channelInput" type="text" />
+            <label>Send a Message!</label>
+            <input v-model="messageInput" type="text" />
           </div>
           <button type="submit">
-            Submit Channel
+            Submit Message
           </button>
         </form>
       </section>
-
-      <div id="chat-log">
-        <div
-          v-for="message of messages"
-          :key="message.id"
-          :data-message-id="message.id">
-          <span>{{message.content}}</span>
-          <span>{{message.createdAt}}</span>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <form @submit.prevent="handleChatSubmit">
-        <div>
-          <label>Send a Message!</label>
-          <input v-model="messageInput" type="text" />
-        </div>
-        <button type="submit">
-          Submit Message
-        </button>
-      </form>
     </section>
   </main>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+
+import ChannelSelector from '@/components/ChannelSelector.vue'
+
 import Channel from '@/entities/state/Channel'
-import Message from '@/entities/state/Message'
-import User from '@/entities/state/User'
 
 import { mapGetters } from 'vuex'
 
 export default defineComponent({
+  components: {
+    ChannelSelector
+  },
   data() {
     return {
       //Local state
@@ -92,19 +78,13 @@ export default defineComponent({
       this.messageInput = '' //Clear the input now that we are sending the message
 
       await this.$services.messageService.sendMessage(this.currentChannel.id, messageContent)
-    },
-    async handleChannelSubmit() {
-      const channelName = this.channelInput
-      this.channelInput = ''
-
-      await this.$services.channelService.createChannel(channelName)
-    },
-    handleChannelSelection(channelId: string) {
-      this.$store.commit({
-        type: 'CHANGE_CURRENT_CHANNEL',
-        channelId
-      })
     }
   }
 })
 </script>
+
+<style lang="stylus">
+  .channel-page
+    display flex
+    height 100%
+</style>

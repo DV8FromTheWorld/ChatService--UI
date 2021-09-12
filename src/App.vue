@@ -1,30 +1,28 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div class="app">
+    <Sidebar />
+    <main class="app__main-content">
+      <router-view />
+    </main>
   </div>
-  <router-view/>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import { defineComponent } from 'vue'
 
-#nav {
-  padding: 30px;
-}
+import Sidebar from '@/components/Sidebar.vue'
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+export default defineComponent({
+  components: {
+    Sidebar
+  }
+})
+</script>
 
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
+<style lang="stylus">
+  //Probably should eventually remove/replace this nested '.app' with the top level `#app-container`
+  .app
+    width 100%
+    height 100%
+    display flex
 </style>

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-import Channel from '../views/Channel.vue'
+import Channel from './views/Channel.vue'
 
 const routes: Array<RouteRecordRaw> = [
   // {

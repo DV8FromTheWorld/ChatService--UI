@@ -34,6 +34,9 @@ module.exports = {
 
 
     //Revisit this one. Not sure we want to do this
-    "ban-ts-comment": "off"
+    "ban-ts-comment": "off",
+
+    //Tired of seeing this warning/error, especially since the IDE will clean this up on save by default
+    "no-trailing-spaces": "off"
   }
 }

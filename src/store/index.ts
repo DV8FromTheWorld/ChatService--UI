@@ -29,7 +29,13 @@ export default createStore<GlobalState>({
     connectedUsers: 0,
 
     users: {},
-    guilds: {},
+    guilds: {
+      default: {
+        id: 'default',
+        name: 'Default Guild',
+        createdAt: new Date().toISOString()
+      }
+    },
     channels: {},
     messages: {}
   },
@@ -37,6 +43,11 @@ export default createStore<GlobalState>({
     READY(state, payload) {
       state.users = payload.users
       state.channels = payload.channels
+
+      const channelList = Object.values(payload.channels) as Array<Channel>
+      if (channelList.length) {
+        state.currentChannelId = channelList[0].id
+      }
     },
     CHANGE_CURRENT_CHANNEL(state, payload) {
       state.currentChannelId = payload.channelId

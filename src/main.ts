@@ -4,6 +4,8 @@ import router from './router'
 import store, { GlobalStore } from './store'
 import ServiceManager, { GlobalServices } from '@/services/ServiceManager'
 
+import './styles/index.styl'
+
 const serviceManager = new ServiceManager(store)
 
 const vueApp = createApp(App)
@@ -12,7 +14,7 @@ const vueApp = createApp(App)
 
 vueApp.config.globalProperties.$services = serviceManager.getServices()
 
-vueApp.mount('#app')
+vueApp.mount('#app-container')
 
 declare module '@vue/runtime-core' {
   export interface ComponentCustomProperties {
